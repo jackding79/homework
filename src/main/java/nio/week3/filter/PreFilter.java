@@ -9,7 +9,7 @@ import nio.week3.TimeGenerator;
 import java.nio.charset.StandardCharsets;
 
 /**
- * 一些简单的校验
+ * 一些简单的校验并在请求头添加流水序号 简单实现序号---当前时间
  */
 public class PreFilter implements IFilter{
 
