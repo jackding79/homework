@@ -21,7 +21,14 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class WebClient {
-
+    /**
+     * 创建httpClient的 request 现在只做get和post
+     * @param request
+     * @param server
+     * @return
+     * @throws URISyntaxException
+     * @throws UnsupportedEncodingException
+     */
     public HttpUriRequest request(FullHttpRequest request, Server server) throws URISyntaxException, UnsupportedEncodingException {
         HttpMethod method = request.method();
         if(HttpMethod.POST == method){
@@ -34,15 +41,19 @@ public class WebClient {
 
     }
 
-    private HttpPost createPostRequest(FullHttpRequest request,Server server) throws URISyntaxException, UnsupportedEncodingException {
-        HttpPost post = new HttpPost();
+    private String api(FullHttpRequest request){
         String uri = request.uri();
         String [] splits = uri.split("/");
         String [] apis = Arrays.copyOfRange(splits,2,splits.length);
 
-        String realApi = String.join("/",apis);
+        return String.join("/",apis);
+    }
+
+    private HttpPost createPostRequest(FullHttpRequest request,Server server) throws URISyntaxException, UnsupportedEncodingException {
+        HttpPost post = new HttpPost();
+        String path = api(request);
         String host = server.getIp() + ":" + server.getPort();
-        post.setURI(new URI("http://" +host + "/" + realApi));
+        post.setURI(new URI("http://" +host + "/" + path));
         for (Map.Entry<String, String> entry : request.headers()) {
             if(!entry.getKey().equals("Content-Length")) {
                 post.setHeader(entry.getKey(), entry.getValue());
@@ -53,8 +64,11 @@ public class WebClient {
         return post;
     }
 
-    private HttpGet createGetRequest(FullHttpRequest request,Server server){
-        return null;
+    private HttpGet createGetRequest(FullHttpRequest request,Server server) throws URISyntaxException {
+        String path = api(request);
+        String host = server.getIp() + ":" + server.getPort();
+        HttpGet get = new HttpGet(new URI("http://" +host + "/" + path));
+        return get;
     }
 
     public HttpResponse execute( FullHttpRequest request,Server server) throws IOException, URISyntaxException {
